@@ -152,6 +152,11 @@ class UploadController(BaseController):
             kwargs['title'], kwargs['description'],
             None, kwargs['file'], kwargs['url'],
         )
+		"""
+        FIXED: creation notification email will now go to the authurs email
+	           also
+        """
+        email.send_media_notification_to_author(media_obj)
         email.send_media_notification(media_obj)
 
         # Redirect to success page!

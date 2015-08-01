@@ -40,10 +40,10 @@ class UploadForm(ListForm):
     events = events.UploadForm
     
     class fields(WidgetsList):
-        name = TextField(validator=validators['name'], label_text=N_('Your Name:'), maxlength=50)
+        name = TextField(validator=validators['name'], label_text=N_('Name:'), maxlength=50)
         email = TextField(validator=email_validator(not_empty=True), label_text=N_('Your Email:'), help_text=N_('(will never be published)'), maxlength=255)
         title = TextField(validator=validators['title'], label_text=N_('Title:'), maxlength=255)
         description = XHTMLTextArea(validator=validators['description'], label_text=N_('Description:'), attrs=dict(rows=5, cols=25))
-        url = TextField(validator=validators['url'], label_text=N_('Add a YouTube, Vimeo or Amazon S3 link:'), maxlength=255)
-        file = FileField(validator=FieldStorageUploadConverter(if_missing=None, messages={'empty':N_('Oops! You forgot to enter a file.')}), label_text=N_('OR:'))
+        url = TextField(validator=validators['url'], label_text=N_(''), maxlength=255,type="hidden")
+        file = FileField(validator=FieldStorageUploadConverter(if_missing=None, messages={'empty':N_('Oops! You forgot to enter a file.')}), label_text=N_(''))
         submit = SubmitButton(default=N_('Submit'), css_classes=['mcore-btn', 'btn-submit'])

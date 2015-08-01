@@ -78,8 +78,42 @@ def send(to_addrs, from_addr, subject, body):
 
     server.sendmail(from_addr, to_addrs, msg.encode('utf-8'))
     server.quit()
+# FIX: new function for sending creation mail to author 
+def send_media_notification_to_author(media_obj):
+    """
+    Send a creation notification email to author that a new Media object has been
+    created.
 
 
+    :param media_obj: The media object to send a notification about.
+    :type media_obj: :class:`~mediadrop.model.media.Media` instance
+	
+    """
+	
+    send_to = [media_obj.author.email]
+    if not send_to:
+        # media notification emails are disabled!
+        return
+    #FIXME: extract host from env on production server
+    edit_url = 'http://127.0.0.1/media/' + media_obj.slug
+    clean_description = strip_xhtml(line_break_xhtml(line_break_xhtml(media_obj.description)))
+    type = media_obj.type
+    title = media_obj.title
+    author_name = media_obj.author.name
+    author_email = media_obj.author.email
+    subject = _('New %(type)s: %(title)s') % locals()
+    body = _("""A new %(type)s file has been uploaded!
+
+Title: %(title)s
+
+Author: %(author_name)s (%(author_email)s)
+
+Video URL: %(edit_url)s
+
+Description: %(clean_description)s
+""") % locals()
+
+    send(send_to, request.settings['email_send_from'], subject, body)
 def send_media_notification(media_obj):
     """
     Send a creation notification email that a new Media object has been
