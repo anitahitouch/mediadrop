@@ -42,6 +42,7 @@ class UploadController(BaseController):
             abort(404)
         return result
 
+ 
     @expose('upload/index.html')
     @observable(events.UploadController.index)
     def index(self, **kwargs):
@@ -69,6 +70,266 @@ class UploadController(BaseController):
             upload_form = upload_form,
             form_values = kwargs,
         )
+	
+	#step 1 submit file data
+    @expose('upload/fileindex.html')
+    @observable(events.UploadController.fileindex)
+    def fileindex(self, **kwargs):
+        """Display the upload form.
+
+        :rtype: Dict
+        :returns:
+            legal_wording
+                XHTML legal wording for rendering
+            support_email
+                An help contact address
+            upload_form
+                The :class:`~mediadrop.forms.uploader.UploadForm` instance
+            form_values
+                ``dict`` form values, if any
+
+        """
+        support_emails = request.settings['email_support_requests']
+        support_emails = email.parse_email_string(support_emails)
+        support_email = support_emails and support_emails[0] or None
+
+        return dict(
+            legal_wording = request.settings['wording_user_uploads'],
+            support_email = support_email,
+            form_values = kwargs,
+			
+        )
+	
+	
+    @expose(request_method='POST')
+    @autocommit
+    @observable(events.UploadController.filesubmit)
+    def filesubmit(self, **kwargs):
+        """
+        """
+        print("got request")
+        kwargs.setdefault('name')
+        kwargs.setdefault('url')
+        kwargs['email'] = 'test@gmail.com'
+        kwargs['description'] = 'abcdedf'
+        kwargs['title'] = 'ghjjjkl333bb'
+        kwargs['name'] = 'happy1'
+        notify_to_author = True 
+        if not kwargs['email'] :
+            notify_to_author = False
+            kwargs['email'] = "anonymous@anonymous.com"
+  
+        # Save the media_obj!
+        media_obj = self.save_media_obj(
+            kwargs['name'], kwargs['email'],
+            kwargs['title'], kwargs['description'],
+            None, kwargs['file'], kwargs['url'],
+        )
+        
+        
+        # Redirect to success page!
+        redirect(action='success')
+		
+    @expose('json', request_method='POST')
+    @validate(upload_form)
+    @autocommit
+    @observable(events.UploadController.filesubmit_async)
+    def filesubmit_async(self, **kwargs):
+        """Ajax form validation and/or submission.
+
+        This is the save handler for :class:`~mediadrop.forms.media.UploadForm`.
+
+        When ajax is enabled this action is called for each field as the user
+        fills them in. Although the entire form is validated, the JS only
+        provides the value of one field at a time,
+
+        :param validate: A JSON list of field names to check for validation
+        :parma \*\*kwargs: One or more form field values.
+        :rtype: JSON dict
+        :returns:
+            :When validating one or more fields:
+
+            valid
+                bool
+            err
+                A dict of error messages keyed by the field names
+
+            :When saving an upload:
+
+            success
+                bool
+            redirect
+                If valid, the redirect url for the upload successful page.
+
+        """
+        if 'validate' in kwargs:
+            # we're just validating the fields. no need to worry.
+            fields = json.loads(kwargs['validate'])
+            err = {}
+            for field in fields:
+                if field in tmpl_context.form_errors:
+                    err[field] = tmpl_context.form_errors[field]
+
+            data = dict(
+                valid = len(err) == 0,
+                err = err
+            )
+        else:
+            # We're actually supposed to save the fields. Let's do it.
+            if len(tmpl_context.form_errors) != 0:
+                # if the form wasn't valid, return failure
+                tmpl_context.form_errors['success'] = False
+                data = tmpl_context.form_errors
+            else:
+                # else actually save it!
+                kwargs.setdefault('name')
+
+                media_obj = self.save_media_obj(
+                    kwargs['name'], kwargs['email'],
+                    kwargs['title'], kwargs['description'],
+                    None, kwargs['file'], kwargs['url'],
+                )
+                email.send_media_notification(media_obj)
+                data = dict(
+                    success = True,
+                    redirect = url_for(action='success')
+                )
+
+        return data	
+			
+	#step 2 : submit form data
+    
+	@expose('upload/tindex.html')
+    @observable(events.UploadController.tindex)
+    def tindex(self, **kwargs):
+        """Display the upload form.
+
+        :rtype: Dict
+        :returns:
+            legal_wording
+                XHTML legal wording for rendering
+            support_email
+                An help contact address
+            upload_form
+                The :class:`~mediadrop.forms.uploader.UploadForm` instance
+            form_values
+                ``dict`` form values, if any
+
+        """
+        support_emails = request.settings['email_support_requests']
+        support_emails = email.parse_email_string(support_emails)
+        support_email = support_emails and support_emails[0] or None
+
+        return dict(
+            legal_wording = request.settings['wording_user_uploads'],
+            support_email = support_email,
+            upload_form = upload_form,
+            form_values = kwargs,
+        )
+	
+	@expose(request_method='POST')
+    @validate(upload_form, error_handler=index)
+    @autocommit
+    @observable(events.UploadController.tsubmit)
+    def tsubmit(self, **kwargs):
+        """
+        """
+        print("got request")
+        kwargs.setdefault('name')
+        kwargs.setdefault('url')
+        kwargs['email'] = 'test@gmail.com'
+        kwargs['description'] = 'abcdedf'
+        kwargs['title'] = 'ghjjjkl333bb'
+        kwargs['name'] = 'happy1'
+        notify_to_author = True 
+        if not kwargs['email'] :
+            notify_to_author = False
+            kwargs['email'] = "anonymous@anonymous.com"
+  
+        # Save the media_obj!
+        media_obj = self.save_media_obj(
+            kwargs['name'], kwargs['email'],
+            kwargs['title'], kwargs['description'],
+            None, kwargs['file'], kwargs['url'],
+        )
+        """
+        FIXED: creation notification email will now go to the authurs email
+            also
+        """
+        if notify_to_author:
+            email.send_media_notification_to_author(media_obj)
+        email.send_media_notification(media_obj)
+        
+        # Redirect to success page!
+        redirect(action='success')
+		
+	
+    @expose('json', request_method='POST')
+    @validate(upload_form)
+    @autocommit
+    @observable(events.UploadController.tsubmit_async)
+    def tsubmit_async(self, **kwargs):
+        """Ajax form validation and/or submission.
+
+        This is the save handler for :class:`~mediadrop.forms.media.UploadForm`.
+
+        When ajax is enabled this action is called for each field as the user
+        fills them in. Although the entire form is validated, the JS only
+        provides the value of one field at a time,
+
+        :param validate: A JSON list of field names to check for validation
+        :parma \*\*kwargs: One or more form field values.
+        :rtype: JSON dict
+        :returns:
+            :When validating one or more fields:
+
+            valid
+                bool
+            err
+                A dict of error messages keyed by the field names
+
+            :When saving an upload:
+
+            success
+                bool
+            redirect
+                If valid, the redirect url for the upload successful page.
+
+        """
+        if 'validate' in kwargs:
+            # we're just validating the fields. no need to worry.
+            fields = json.loads(kwargs['validate'])
+            err = {}
+            for field in fields:
+                if field in tmpl_context.form_errors:
+                    err[field] = tmpl_context.form_errors[field]
+
+            data = dict(
+                valid = len(err) == 0,
+                err = err
+            )
+        else:
+            # We're actually supposed to save the fields. Let's do it.
+            if len(tmpl_context.form_errors) != 0:
+                # if the form wasn't valid, return failure
+                tmpl_context.form_errors['success'] = False
+                data = tmpl_context.form_errors
+            else:
+                # else actually save it!
+                kwargs.setdefault('name')
+
+                media_obj = self.save_media_obj(
+                    kwargs['name'], kwargs['email'],
+                    kwargs['title'], kwargs['description'],
+                    None, kwargs['file'], kwargs['url'],
+                )
+                email.send_media_notification(media_obj)
+                data = dict(
+                    success = True,
+                    redirect = url_for(action='success')
+                )
+
+        return data
 
     @expose('json', request_method='POST')
     @validate(upload_form)
@@ -138,7 +399,8 @@ class UploadController(BaseController):
         return data
 
     @expose(request_method='POST')
-    @validate(upload_form, error_handler=index)
+
+    #@validate(upload_form, error_handler=index)
     @autocommit
     @observable(events.UploadController.submit)
     def submit(self, **kwargs):
@@ -152,13 +414,10 @@ class UploadController(BaseController):
             kwargs['title'], kwargs['description'],
             None, kwargs['file'], kwargs['url'],
         )
-		"""
-        FIXED: creation notification email will now go to the authurs email
-	           also
-        """
-        email.send_media_notification_to_author(media_obj)
+
         email.send_media_notification(media_obj)
 
+        
         # Redirect to success page!
         redirect(action='success')
 
