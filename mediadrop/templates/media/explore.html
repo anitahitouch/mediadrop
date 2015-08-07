@@ -82,6 +82,7 @@ See LICENSE.txt in the main project directory, for more information.
 			</py:if>
 
 			<h2><a href="${h.url_for(action='index', show='popular')}" class="underline-hover uppercase mcore-heading">Most Popular</a></h2>
+			<h2><a href="/upload/fileindex" class="underline-hover uppercase mcore-heading">Drag And Drop Upload</a></h2>
 			<py:if test="popular">
 				<ul py:replace="media_grid(popular, thumb_size='m', desc_len=135)" />
 				<a class="mcore-btn mcore-btn-grey mcore-btn-more" href="${h.url_for(action='index', show='popular')}"><span>${h.best_translation(N_('More popular media'), N_('View More'))}</span></a>

@@ -17,17 +17,36 @@ See LICENSE.txt in the main project directory, for more information.
 	<meta name="keywords" content="${h.meta_keywords(upload=True)}" />
 	<meta name="description" content="${h.meta_description(upload='all')}" />
 	<link href="${h.url_for('/styles/upload.css')}" media="screen" rel="stylesheet" type="text/css" />
-	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet"/>
+	
 	<script src="${h.js('mootools_core')}" type="text/javascript"></script>
 	<script src="${h.js('mootools_more')}" type="text/javascript"></script>
-	  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet" />
+	  <link href="/support/css/bootstrap.min.css" rel="stylesheet" />
        <link href="/support/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script src="/support/js/fileinput.js" type="text/javascript"></script>
         <script src="/support/js/fileinput_locale_fr.js" type="text/javascript"></script>
         <script src="/support/js/fileinput_locale_es.js" type="text/javascript"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js" type="text/javascript"></script>
-		
+		<style>
+			.mcore-nav-box {
+  width: 950px;
+  padding: 14px 15px;
+  height: 65px;
+  margin: 0 auto 15px auto;
+}
+			#nav-search input {
+  float: left;
+  width: 131px;
+  height: 36px;
+  padding: 11px 0 11px 10px;
+  margin: 0;
+  border: 0;
+}
+			#upload-wording .feat-content {
+  width:920px;
+  overflow: hidden;
+}
+		</style>
     </head>
     <body class="nav-upload-on">
 		<div class="mediadrop-content">
@@ -46,18 +65,22 @@ See LICENSE.txt in the main project directory, for more information.
 		<!--${upload_form(form_values)}-->
 		
 	</div>
-<div class="container kv-main">
+
+	<div class="mediadrop-content">	
+		<div class="container kv-main">
 <div class="form-group"><input id="file-1" class="file" multiple="multiple" name="file" type="file" data-overwrite-initial="false" data-min-file-count="1" /></div>
 </div>
+		<a href="/upload/tindex" class="button-enter">Enter details</a>
+		</div>
 </body>
 	<script>
    
     $("#file-1").fileinput({
-        uploadUrl: '/upload/submit', // you must set a valid URL here else you will get an error
+        uploadUrl: '/upload/filesubmit', // you must set a valid URL here else you will get an error
         allowedFileExtensions : ['jpg', 'png','gif'],
         overwriteInitial: false,
-        maxFileSize: 10000,
-        maxFilesNum: 10,
+        maxFileSize: 40000,
+        maxFilesNum: 1,
         allowedFileTypes: ['video'],
         slugCallback: function(filename) {
             return filename.replace('(', '_').replace(']', '_');

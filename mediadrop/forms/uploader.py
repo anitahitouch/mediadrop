@@ -45,5 +45,5 @@ class UploadForm(ListForm):
         title = TextField(validator=validators['title'], label_text=N_('Title:'), maxlength=255)
         description = XHTMLTextArea(validator=validators['description'], label_text=N_('Description:'), attrs=dict(rows=5, cols=25))
         url = TextField(validator=validators['url'], label_text=N_(''), maxlength=255,type="hidden")
-        file = FileField(validator=FieldStorageUploadConverter(if_missing=None, messages={'empty':N_('Oops! You forgot to enter a file.')}), label_text=N_(''))
+        #file = FileField(validator=FieldStorageUploadConverter(if_missing=None, messages={'empty':N_('Oops! You forgot to enter a file.')}), label_text=N_(''))
         submit = SubmitButton(default=N_('Submit'), css_classes=['mcore-btn', 'btn-submit'])
