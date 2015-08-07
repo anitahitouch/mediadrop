@@ -307,12 +307,13 @@ class UploadController(object):
     submit_async = Event(['**kwargs'])
     success = Event(['**kwargs'])
     failure = Event(['**kwargs'])
-	fileindex = Event(['**kwargs'])
+    fileindex = Event(['**kwargs'])
     filesubmit = Event(['**kwargs'])
     filesubmit_async = Event(['**kwargs'])
     tindex = Event(['**kwargs'])
     tsubmit = Event(['**kwargs'])
     tsubmit_async = Event(['**kwargs'])
+
 ###############################################################################
 # Models
 
