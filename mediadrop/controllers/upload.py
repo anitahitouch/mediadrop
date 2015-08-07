@@ -29,6 +29,7 @@ upload_form = UploadForm(
 )
 
 tfile = dict()
+
 class UploadController(BaseController):
     """
     Media Upload Controller
@@ -42,7 +43,35 @@ class UploadController(BaseController):
         if not request.perm.contains_permission('upload'):
             abort(404)
         return result
-
+ 
+    
+    #@expose('upload/index.html')
+    #@observable(events.UploadController.index)
+    #def index(self, **kwargs):
+    #    """Display the upload form.
+    #
+    #   :rtype: Dict
+    #  :returns:
+    #        legal_wording
+    #            XHTML legal wording for rendering
+    #        support_email
+    #            An help contact address
+    #        upload_form
+    #            The :class:`~mediadrop.forms.uploader.UploadForm` instance
+    #        form_values
+    #            ``dict`` form values, if any
+    #
+    #    """
+    #    support_emails = request.settings['email_support_requests']
+    #    support_emails = email.parse_email_string(support_emails)
+    #    support_email = support_emails and support_emails[0] or None
+    #
+    #    return dict(
+    #        legal_wording = request.settings['wording_user_uploads'],
+    #        support_email = support_email,
+    #        upload_form = upload_form,
+    #        form_values = kwargs,
+    #    )
  
     @expose('upload/index.html')
     @observable(events.UploadController.index)
@@ -71,8 +100,8 @@ class UploadController(BaseController):
             upload_form = upload_form,
             form_values = kwargs,
         )
-    
-    #step 1 submit file data
+	
+	
     @expose('upload/fileindex.html')
     @observable(events.UploadController.fileindex)
     def fileindex(self, **kwargs):
@@ -98,20 +127,20 @@ class UploadController(BaseController):
             legal_wording = request.settings['wording_user_uploads'],
             support_email = support_email,
             form_values = kwargs,
-            
+			
         )
-    
-    
+
+	#step 1 submit file data
     @expose(request_method='POST')
     @autocommit
     @observable(events.UploadController.filesubmit)
-      def filesubmit(self, **kwargs):
+    def filesubmit(self, **kwargs):
         """
         """ 
         tfile[kwargs['environ']['HTTP_COOKIE']] = kwargs['file']
-        # Redirect to tindex page!
+		# Redirect to tindex page!
         #redirect(action='tindex')
-            
+			
     #step 2 : submit form data
     
     @expose('upload/tindex.html')
@@ -143,7 +172,7 @@ class UploadController(BaseController):
             ),
             form_values = kwargs,
         )
-    
+	
     @expose(request_method='POST')
     @validate(upload_form, error_handler=tindex)
     @autocommit
@@ -151,7 +180,6 @@ class UploadController(BaseController):
     def tsubmit(self, **kwargs):
         """
         """
-
         tlocalfile = tfile[kwargs['environ']['HTTP_COOKIE']]
         notify_to_author = True 
         if not kwargs['email'] :
@@ -168,17 +196,17 @@ class UploadController(BaseController):
         FIXED: creation notification email will now go to the authurs email
             also
         """
-        if notify_to_author:
-            email.send_media_notification_to_author(media_obj)
+        #if notify_to_author:
+        #    email.send_media_notification_to_author(media_obj)
         email.send_media_notification(media_obj)
         
         #delete the key
         del tfile[kwargs['environ']['HTTP_COOKIE']]
         #redirect to success page
         redirect(action='success')
-        
-    
-  
+		
+	
+   
 
     @expose('json', request_method='POST')
     @validate(upload_form)
@@ -248,7 +276,6 @@ class UploadController(BaseController):
         return data
 
     @expose(request_method='POST')
-
     #@validate(upload_form, error_handler=index)
     @autocommit
     @observable(events.UploadController.submit)
@@ -256,16 +283,13 @@ class UploadController(BaseController):
         """
         """
         kwargs.setdefault('name')
-
         # Save the media_obj!
         media_obj = self.save_media_obj(
             kwargs['name'], kwargs['email'],
             kwargs['title'], kwargs['description'],
             None, kwargs['file'], kwargs['url'],
         )
-
         email.send_media_notification(media_obj)
-
         
         # Redirect to success page!
         redirect(action='success')
